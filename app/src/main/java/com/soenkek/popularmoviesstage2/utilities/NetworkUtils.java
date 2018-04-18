@@ -9,6 +9,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 
+import com.soenkek.popularmoviesstage2.BuildConfig;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -32,7 +34,7 @@ public class NetworkUtils {
     public static final String SORT_BY_RAT = "top_rated";
     public static final String SORT_BY_FAV = "favorite";
 
-    private static final String TMDB_API_KEY = "000";
+    private static final String TMDB_API_KEY = BuildConfig.API_KEY;
 
 
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
