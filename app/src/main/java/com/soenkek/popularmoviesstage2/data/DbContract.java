@@ -19,6 +19,13 @@ public class DbContract {
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_FAVORITES).build();
         public static final String TABLE_NAME = "favorites";
         public static final String COLUMN_MOVIE_ID = "movieId";
-        public static final String COLUMN_TIME = "timeAdded";
+        public static final String COLUMN_MOVIE_TITLE = "title";
+        public static final String COLUMN_MOVIE_ORIGINAL_TITLE = "originalTitle";
+        public static final String COLUMN_MOVIE_POSTER_PATH = "posterPath";
+        public static final String COLUMN_MOVIE_DETAIL_POSTER_PATH = "detailPosterPath";
+        public static final String COLUMN_MOVIE_SYNOPSIS = "synopsis";
+        public static final String COLUMN_MOVIE_RATING = "rating";
+        public static final String COLUMN_MOVIE_RELEASE = "release";
+        public static final String COLUMN_TIMESTAMP = "timestamp";
     }
 }

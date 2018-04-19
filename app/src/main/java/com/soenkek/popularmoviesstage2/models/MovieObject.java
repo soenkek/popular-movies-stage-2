@@ -14,15 +14,17 @@ public class MovieObject implements Parcelable{
     private final String title;
     private final String originalTitle;
     private final String posterPath;
+    private final String detailPosterPath;
     private final String synopsis;
     private final float rating;
     private final String release;
 
-    public MovieObject(String id, String title, String originalTitle, String posterPath, String synopsis, float rating, String release) {
+    public MovieObject(String id, String title, String originalTitle, String posterPath, String detailPosterPath, String synopsis, float rating, String release) {
         this.id = id;
         this.title = title;
         this.originalTitle = originalTitle;
         this.posterPath = posterPath;
+        this.detailPosterPath = detailPosterPath;
         this.synopsis = synopsis;
         this.rating = rating;
         this.release = release;
@@ -33,6 +35,7 @@ public class MovieObject implements Parcelable{
         title = in.readString();
         originalTitle = in.readString();
         posterPath = in.readString();
+        detailPosterPath = in.readString();
         synopsis = in.readString();
         rating = in.readFloat();
         release = in.readString();
@@ -58,6 +61,8 @@ public class MovieObject implements Parcelable{
 
     public String getPosterPath() {return posterPath;}
 
+    public String getDetailPosterPath() {return detailPosterPath;}
+
     public String getSynopsis() {return synopsis;}
 
     public float getRating() {return rating;}
@@ -75,6 +80,7 @@ public class MovieObject implements Parcelable{
         parcel.writeString(title);
         parcel.writeString(originalTitle);
         parcel.writeString(posterPath);
+        parcel.writeString(detailPosterPath);
         parcel.writeString(synopsis);
         parcel.writeFloat(rating);
         parcel.writeString(release);

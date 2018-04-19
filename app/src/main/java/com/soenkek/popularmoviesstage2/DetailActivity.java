@@ -107,7 +107,7 @@ public class DetailActivity extends AppCompatActivity
     private void populateViews() {
         collapsingToolbarLayout.setTitle(mMovieObject.getTitle());
         Picasso.with(this)
-                .load(NetworkUtils.buildImageUri(mMovieObject.getPosterPath(), getString(R.string.image_size_detail)))
+                .load(NetworkUtils.buildImageUri(mMovieObject.getDetailPosterPath(), getString(R.string.image_size_detail)))
                 .into(posterView);
         ratingImageView.setRating(mMovieObject.getRating()/2);
         String rating = Math.round(mMovieObject.getRating()*10) + "%";
@@ -123,22 +123,32 @@ public class DetailActivity extends AppCompatActivity
         }
         releaseView.setText(mMovieObject.getRelease());
         synopsisView.setText(mMovieObject.getSynopsis());
-        if (isFav)btnFav.setImageResource(R.drawable.ic_favorite_white_36dp);
-        else btnFav.setImageResource(R.drawable.ic_favorite_border_white_36dp);
+        setFavButton();
         btnFav.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!isFav) {
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_ID, mMovieObject.getId());
+                    String id = mMovieObject.getId();
+                    String posterPath = mMovieObject.getDetailPosterPath();
+                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_ID, id);
+                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_POSTER_PATH, posterPath);
                     getContentResolver().insert(DbContract.Favorites.CONTENT_URI, contentValues);
+                    isFav = true;
                 } else {
                     Uri uri = DbContract.Favorites.CONTENT_URI.buildUpon()
                             .appendPath(mMovieObject.getId()).build();
                     getContentResolver().delete(uri, null, null);
+                    isFav = false;
                 }
+                setFavButton();
             }
         });
+    }
+
+    private void setFavButton() {
+        if (isFav)btnFav.setImageResource(R.drawable.ic_favorite_white_36dp);
+        else btnFav.setImageResource(R.drawable.ic_favorite_border_white_36dp);
     }
 
     @Override

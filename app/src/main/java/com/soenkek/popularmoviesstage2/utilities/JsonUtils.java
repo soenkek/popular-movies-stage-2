@@ -28,7 +28,7 @@ public class JsonUtils {
             JSONObject result = resultsArray.getJSONObject(i);
             String id = result.getString("id");
             String poster_path = result.getString("poster_path");
-            movieObjects.add(i, new MovieObject(id, null, null, poster_path, null, 0, null));
+            movieObjects.add(i, new MovieObject(id, null, null, poster_path, null, null, 0, null));
         }
         return movieObjects;
     }
@@ -36,14 +36,15 @@ public class JsonUtils {
     public static MovieObject parseDetailsJson(String json) throws JSONException, ParseException {
         if (json == null || json.equals("")) throw new JSONException("Empty json");
         JSONObject jsonObject = new JSONObject(json);
-        String[] data = new String[6];
+        String id = jsonObject.getString("id");
         String title = jsonObject.getString("title");
         String original_title = jsonObject.getString("original_title");
+        String posterPath = jsonObject.getString("poster_path");
         String backdrop_path = jsonObject.getString("backdrop_path");
         String synopsis = jsonObject.getString("overview");
         float vote_average = Float.parseFloat(jsonObject.getString("vote_average"));
         String releaseDate = formatDate(jsonObject.getString("release_date"));
-        return new MovieObject(null, title, original_title, backdrop_path, synopsis, vote_average, releaseDate);
+        return new MovieObject(id, title, original_title, posterPath, backdrop_path, synopsis, vote_average, releaseDate);
     }
 
     public static ArrayList<TrailerObject> parseTrailersJson(String json) throws JSONException, ParseException {

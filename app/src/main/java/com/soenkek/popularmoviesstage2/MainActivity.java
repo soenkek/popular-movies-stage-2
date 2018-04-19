@@ -5,6 +5,8 @@
 package com.soenkek.popularmoviesstage2;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.soenkek.popularmoviesstage2.adapters.MovieObjectAdapter;
+import com.soenkek.popularmoviesstage2.data.DbContract;
 import com.soenkek.popularmoviesstage2.models.MovieObject;
 import com.soenkek.popularmoviesstage2.utilities.JsonUtils;
 import com.soenkek.popularmoviesstage2.utilities.NetworkUtils;
@@ -59,23 +62,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setTitle("");
 
         ButterKnife.bind(this);
 
-        settingsPopIv = (ImageView) settingsItemPop.findViewById(R.id.sort_item_iv);
+        settingsPopIv = settingsItemPop.findViewById(R.id.sort_item_iv);
         settingsPopIv.setImageResource(R.drawable.set_ic_pop_white_24dp);
-        settingsRatIv = (ImageView) settingsItemRat.findViewById(R.id.sort_item_iv);
+        settingsRatIv = settingsItemRat.findViewById(R.id.sort_item_iv);
         settingsRatIv.setImageResource(R.drawable.set_ic_rat_white_24dp);
-        settingsFavIv = (ImageView) settingsItemFav.findViewById(R.id.sort_item_iv);
+        settingsFavIv = settingsItemFav.findViewById(R.id.sort_item_iv);
         settingsFavIv.setImageResource(R.drawable.set_ic_fav_white_24dp);
-        settingsPopTv = (TextView) settingsItemPop.findViewById(R.id.sort_item_tv);
+        settingsPopTv = settingsItemPop.findViewById(R.id.sort_item_tv);
         settingsPopTv.setText(R.string.settings_pop_label);
-        settingsRatTv = (TextView) settingsItemRat.findViewById(R.id.sort_item_tv);
+        settingsRatTv = settingsItemRat.findViewById(R.id.sort_item_tv);
         settingsRatTv.setText(R.string.settings_rat_label);
-        settingsFavTv = (TextView) settingsItemFav.findViewById(R.id.sort_item_tv);
+        settingsFavTv = settingsItemFav.findViewById(R.id.sort_item_tv);
         settingsFavTv.setText(R.string.settings_fav_label);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_INSTANCE_MOVIES_KEY)) {
@@ -152,10 +155,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void updateData() {
-        if (NetworkUtils.isConnected(this)) {
-            new FetchDataTask().execute(sortBy);
+        if (sortBy != NetworkUtils.SORT_BY_FAV) {
+            if (NetworkUtils.isConnected(this)) {
+                new FetchDataTask().execute(sortBy);
+            } else {
+                Toast.makeText(this, "No Network Connection", Toast.LENGTH_LONG).show();
+            }
         } else {
-            Toast.makeText(this, "No Network Connection", Toast.LENGTH_LONG).show();
+            Uri uri = DbContract.Favorites.CONTENT_URI;
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            movieObjects.clear();
+            cursor.moveToFirst();
+            for (int i = 0; i < cursor.getCount(); i++) {
+                MovieObject movieObject = new MovieObject(
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_ID)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_TITLE)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_ORIGINAL_TITLE)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_POSTER_PATH)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_DETAIL_POSTER_PATH)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_SYNOPSIS)),
+                        cursor.getFloat(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_RATING)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_RELEASE))
+                );
+                movieObjects.add(movieObject);
+                cursor.moveToNext();
+            }
+            populateGridLayout();
         }
     }
 

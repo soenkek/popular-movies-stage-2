@@ -13,7 +13,7 @@ import com.soenkek.popularmoviesstage2.data.DbContract.Favorites;
 public class DbHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "popmovies.db";
-    public static final int DATABASE_VERSION = 6;
+    public static final int DATABASE_VERSION = 7;
 
     public DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -24,7 +24,14 @@ public class DbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_FAVORITES_TABLE = "CREATE TABLE " + Favorites.TABLE_NAME + " (" +
                 Favorites._ID               + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 Favorites.COLUMN_MOVIE_ID   + " TEXT NOT NULL UNIQUE, " +
-                Favorites.COLUMN_TIME       + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                Favorites.COLUMN_MOVIE_TITLE + " TEXT, " +
+                Favorites.COLUMN_MOVIE_ORIGINAL_TITLE + " TEXT, " +
+                Favorites.COLUMN_MOVIE_POSTER_PATH + " TEXT NOT NULL, " +
+                Favorites.COLUMN_MOVIE_DETAIL_POSTER_PATH + " TEXT, " +
+                Favorites.COLUMN_MOVIE_SYNOPSIS + " TEXT, " +
+                Favorites.COLUMN_MOVIE_RATING + " TEXT, " +
+                Favorites.COLUMN_MOVIE_RELEASE + " TEXT, " +
+                Favorites.COLUMN_TIMESTAMP + " COLUMN_TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 "); ";
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);
     }
