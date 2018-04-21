@@ -21,8 +21,13 @@ import java.util.List;
 
 public class MovieObjectAdapter extends ArrayAdapter<MovieObject> {
 
-    public MovieObjectAdapter(Activity context, List<MovieObject> movieObjects) {
+    private final String imgSize;
+    private final boolean sortedByFav;
+
+    public MovieObjectAdapter(Activity context, List<MovieObject> movieObjects, String imgSize, boolean sortedByFav) {
         super(context, 0, movieObjects);
+        this.imgSize = imgSize;
+        this.sortedByFav = sortedByFav;
     }
 
     @NonNull
@@ -33,8 +38,14 @@ public class MovieObjectAdapter extends ArrayAdapter<MovieObject> {
             view = LayoutInflater.from(getContext()).inflate(R.layout.item_movie, parent, false);
         }
         ImageView imageView = view.findViewById(R.id.item_movie_image);
+        String imgPath;
+        if (sortedByFav) {
+            imgPath = movieObject.getDetailPosterPath();
+        } else {
+            imgPath = movieObject.getPosterPath();
+        }
         Picasso.with(getContext())
-                .load(NetworkUtils.buildImageUri(movieObject.getPosterPath(), getContext().getString(R.string.image_size_grid)))
+                .load(NetworkUtils.buildImageUri(imgPath, imgSize))
                 .into(imageView);
         return view;
     }

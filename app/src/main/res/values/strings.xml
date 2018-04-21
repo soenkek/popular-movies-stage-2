@@ -11,6 +11,9 @@
     <string name="detail_original_title_label">Original Title:</string>
     <string name="detail_release_label">Release Date: </string>
 
+    <!--Info Views-->
+    <string name="refresh_no_connection">Connection failed. Tap to try again.</string>
+
     <!--Image sizes-->
     <string name="image_size_grid">w185</string>
     <string name="image_size_detail">w342</string>

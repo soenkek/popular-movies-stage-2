@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView settingsFavTv;
 
     @BindView(R.id.main_grid_view) GridView gridView;
+    @BindView(R.id.refresh_view) View refreshView;
 
     private String sortBy;
     private ArrayList<MovieObject> movieObjects;
@@ -104,6 +105,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         settingsItemPop.setOnClickListener(this);
         settingsItemRat.setOnClickListener(this);
         settingsItemFav.setOnClickListener(this);
+        refreshView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateData();
+            }
+        });
     }
 
     @Override
@@ -159,19 +166,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (NetworkUtils.isConnected(this)) {
                 new FetchDataTask().execute(sortBy);
             } else {
+                gridView.setVisibility(View.GONE);
+                refreshView.setVisibility(View.VISIBLE);
                 Toast.makeText(this, "No Network Connection", Toast.LENGTH_LONG).show();
             }
         } else {
             Uri uri = DbContract.Favorites.CONTENT_URI;
             Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            movieObjects.clear();
+            movieObjects = new ArrayList<>();
             cursor.moveToFirst();
             for (int i = 0; i < cursor.getCount(); i++) {
                 MovieObject movieObject = new MovieObject(
                         cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_ID)),
                         cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_TITLE)),
                         cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_ORIGINAL_TITLE)),
-                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_POSTER_PATH)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_MAIN_POSTER_PATH)),
                         cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_DETAIL_POSTER_PATH)),
                         cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_SYNOPSIS)),
                         cursor.getFloat(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_RATING)),
@@ -185,8 +194,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void populateGridLayout() {
-        MovieObjectAdapter movieObjectAdapter = new MovieObjectAdapter(this, movieObjects);
-        gridView.setAdapter(movieObjectAdapter);
+        refreshView.setVisibility(View.GONE);
+        gridView.setVisibility(View.VISIBLE);
+        String imgSize;
+        boolean sortByFav;
+        if (sortBy == NetworkUtils.SORT_BY_FAV) {
+            imgSize = getString(R.string.image_size_detail);
+            sortByFav = true;
+        }
+        else {
+            imgSize = getString(R.string.image_size_grid);
+            sortByFav = false;
+        }
+        if (movieObjects != null) {
+            MovieObjectAdapter movieObjectAdapter = new MovieObjectAdapter(this, movieObjects, imgSize, sortByFav);
+            gridView.setAdapter(movieObjectAdapter);
+        }
     }
 
     @Override

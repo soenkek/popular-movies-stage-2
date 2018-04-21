@@ -129,16 +129,16 @@ public class NetworkUtils {
                 .build();
     }
 
-    public static Uri buildTrailerUri(String key) {
-        return Uri.parse(TRAILER_BASE_URL).buildUpon()
-                .appendQueryParameter("v", key)
-                .build();
-    }
-
     public static Uri buildThumbnailUri(String key) {
         return Uri.parse(THUMBNAIL_BASE_URL).buildUpon()
                 .appendEncodedPath(key)
                 .appendEncodedPath(PATH_THUMBNAIL_HQ)
+                .build();
+    }
+
+    public static Uri buildTrailerUri(String key) {
+        return Uri.parse(TRAILER_BASE_URL).buildUpon()
+                .appendQueryParameter("v", key)
                 .build();
     }
 

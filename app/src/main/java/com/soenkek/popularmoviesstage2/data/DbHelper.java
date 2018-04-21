@@ -26,7 +26,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 Favorites.COLUMN_MOVIE_ID   + " TEXT NOT NULL UNIQUE, " +
                 Favorites.COLUMN_MOVIE_TITLE + " TEXT, " +
                 Favorites.COLUMN_MOVIE_ORIGINAL_TITLE + " TEXT, " +
-                Favorites.COLUMN_MOVIE_POSTER_PATH + " TEXT NOT NULL, " +
+                Favorites.COLUMN_MOVIE_MAIN_POSTER_PATH + " TEXT NOT NULL, " +
                 Favorites.COLUMN_MOVIE_DETAIL_POSTER_PATH + " TEXT, " +
                 Favorites.COLUMN_MOVIE_SYNOPSIS + " TEXT, " +
                 Favorites.COLUMN_MOVIE_RATING + " TEXT, " +

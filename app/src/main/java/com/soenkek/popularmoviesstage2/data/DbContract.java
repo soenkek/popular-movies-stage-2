@@ -21,7 +21,7 @@ public class DbContract {
         public static final String COLUMN_MOVIE_ID = "movieId";
         public static final String COLUMN_MOVIE_TITLE = "title";
         public static final String COLUMN_MOVIE_ORIGINAL_TITLE = "originalTitle";
-        public static final String COLUMN_MOVIE_POSTER_PATH = "posterPath";
+        public static final String COLUMN_MOVIE_MAIN_POSTER_PATH = "posterPath";
         public static final String COLUMN_MOVIE_DETAIL_POSTER_PATH = "detailPosterPath";
         public static final String COLUMN_MOVIE_SYNOPSIS = "synopsis";
         public static final String COLUMN_MOVIE_RATING = "rating";

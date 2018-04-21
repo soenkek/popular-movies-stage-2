@@ -67,6 +67,7 @@ public class DetailActivity extends AppCompatActivity
     @BindView(R.id.detail_recyclerview_reviews) RecyclerView mRecyclerviewReviews;
 
     private boolean isFav = false;
+    private String mId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,8 +101,8 @@ public class DetailActivity extends AppCompatActivity
             Toast.makeText(this, "Error Loading Movie Details", Toast.LENGTH_LONG).show();
             finish();
         }
-        String id = callingIntent.getStringExtra(MainActivity.INTENT_EXTRA_LIST_INDEX);
-        new FetchDataTask().execute(id);
+        mId = callingIntent.getStringExtra(MainActivity.INTENT_EXTRA_LIST_INDEX);
+        new FetchMovieTask().execute(mId);
     }
 
     private void populateViews() {
@@ -130,9 +131,21 @@ public class DetailActivity extends AppCompatActivity
                 if (!isFav) {
                     ContentValues contentValues = new ContentValues();
                     String id = mMovieObject.getId();
-                    String posterPath = mMovieObject.getDetailPosterPath();
+                    String title = mMovieObject.getTitle();
+                    String originalTitle = mMovieObject.getOriginalTitle();
+                    String posterPath = mMovieObject.getPosterPath();
+                    String detailPosterPath = mMovieObject.getDetailPosterPath();
+                    String synopsis = mMovieObject.getSynopsis();
+                    Float rating = mMovieObject.getRating();
+                    String release = mMovieObject.getRelease();
                     contentValues.put(DbContract.Favorites.COLUMN_MOVIE_ID, id);
-                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_POSTER_PATH, posterPath);
+                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_TITLE, title);
+                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_ORIGINAL_TITLE, originalTitle);
+                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_MAIN_POSTER_PATH, posterPath);
+                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_DETAIL_POSTER_PATH, detailPosterPath);
+                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_SYNOPSIS, synopsis);
+                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_RATING, rating);
+                    contentValues.put(DbContract.Favorites.COLUMN_MOVIE_RELEASE, release);
                     getContentResolver().insert(DbContract.Favorites.CONTENT_URI, contentValues);
                     isFav = true;
                 } else {
@@ -166,9 +179,9 @@ public class DetailActivity extends AppCompatActivity
         }
     }
 
-    class FetchDataTask extends AsyncTask<String, Void, MovieObject> {
+    class FetchMovieTask extends AsyncTask<String, Void, Void> {
         @Override
-        protected MovieObject doInBackground(String... id) {
+        protected Void doInBackground(String... id) {
             URL detailsUrl = NetworkUtils.fetchMovieDetails(id[0]);
             URL trailersUrl = NetworkUtils.fetchMovieTrailers(id[0]);
             URL reviewsURL = NetworkUtils.fetchMovieReviews(id[0]);
@@ -181,42 +194,76 @@ public class DetailActivity extends AppCompatActivity
                     null,
                     null,
                     null);
-            //cursor.moveToFirst();
-            if (cursor.getCount() != 0) {
+//            if (cursor.getCount() != 0) {
+//                isFav = true;
+//            } else {
+//                isFav = false;
+//            }
+            MovieObject movieObject = null;
+            if (cursor != null && cursor.moveToFirst()) {
                 isFav = true;
+                mMovieObject = new MovieObject(
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_ID)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_TITLE)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_ORIGINAL_TITLE)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_MAIN_POSTER_PATH)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_DETAIL_POSTER_PATH)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_SYNOPSIS)),
+                        cursor.getFloat(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_RATING)),
+                        cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_RELEASE))
+                );
+                cursor.close();
             } else {
                 isFav = false;
+                try {
+                    jsonDetails = NetworkUtils.httpRequest(detailsUrl);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    mMovieObject = JsonUtils.parseDetailsJson(jsonDetails);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    cancel(true);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    cancel(true);
+                }
             }
 
             try {
-                jsonDetails = NetworkUtils.httpRequest(detailsUrl);
                 jsonTrailers = NetworkUtils.httpRequest(trailersUrl);
                 jsonReviews = NetworkUtils.httpRequest(reviewsURL);
             } catch (IOException e) {
                 e.printStackTrace();
+                cancel(true);
             }
-            MovieObject movieObject = null;
             try {
-                movieObject = JsonUtils.parseDetailsJson(jsonDetails);
                 mTrailerObjects = JsonUtils.parseTrailersJson(jsonTrailers);
                 mReviewObjects = JsonUtils.parseReviewsJson(jsonReviews);
             } catch (JSONException e) {
                 e.printStackTrace();
-                cancel(true);
+//                cancel(true);
             } catch (ParseException e) {
                 e.printStackTrace();
-                cancel(true);
+//                cancel(true);
             }
-            return movieObject;
+            return null;
         }
+
         @Override
-        protected void onPostExecute(MovieObject data) {
-            mMovieObject = data;
-            mTrailerAdapter.setTrailerData(mTrailerObjects);
-            mRecyclerviewTrailers.setAdapter(mTrailerAdapter);
-            mReviewAdapter.setReviewData(mReviewObjects);
-            mRecyclerviewReviews.setAdapter(mReviewAdapter);
-            populateViews();
+        protected void onPostExecute(Void v) {
+            if (mMovieObject != null) {
+                populateViews();
+            }
+            if (mTrailerObjects != null) {
+                mTrailerAdapter.setTrailerData(mTrailerObjects);
+                mRecyclerviewTrailers.setAdapter(mTrailerAdapter);
+            }
+            if (mReviewObjects != null) {
+                mReviewAdapter.setReviewData(mReviewObjects);
+                mRecyclerviewReviews.setAdapter(mReviewAdapter);
+            }
         }
     }
 }
