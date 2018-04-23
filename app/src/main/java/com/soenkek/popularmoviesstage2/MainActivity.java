@@ -29,7 +29,6 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -48,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView settingsFavIv;
     private TextView settingsFavTv;
 
+    @BindView(R.id.root_layout) View rootLayout;
     @BindView(R.id.main_grid_view) GridView gridView;
     @BindView(R.id.refresh_view) View refreshView;
 
@@ -55,8 +55,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<MovieObject> movieObjects;
 
     private static final String SAVED_INSTANCE_MOVIES_KEY = "movie-objects";
-    public static final String INTENT_EXTRA_MOVIE_KEY = "movie-object";
     public static final String INTENT_EXTRA_LIST_INDEX = "list-index";
+
+    private Toast mToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setTitle("");
+
+        mToast = Toast.makeText(this, R.string.toast_connection_failed, Toast.LENGTH_LONG);
 
         ButterKnife.bind(this);
 
@@ -86,7 +89,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             sortBy = savedInstanceState.getString("sortBy");
             movieObjects = savedInstanceState.getParcelableArrayList(SAVED_INSTANCE_MOVIES_KEY);
             settingsSwitched();
+            if (movieObjects != null) {
             populateGridLayout();
+            } else {
+                updateData();
+            }
         } else {
             sortBy = NetworkUtils.SORT_BY_POP;
             settingsSwitched();
@@ -162,17 +169,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void updateData() {
-        if (sortBy != NetworkUtils.SORT_BY_FAV) {
+        if (!sortBy.equals(NetworkUtils.SORT_BY_FAV)) {
+            rootLayout.setBackgroundColor(getResources().getColor(R.color.white));
             if (NetworkUtils.isConnected(this)) {
                 new FetchDataTask().execute(sortBy);
+                if (mToast != null) {
+                    mToast.cancel();
+                }
             } else {
                 gridView.setVisibility(View.GONE);
                 refreshView.setVisibility(View.VISIBLE);
-                Toast.makeText(this, "No Network Connection", Toast.LENGTH_LONG).show();
+                movieObjects = null;
+                mToast.show();
             }
         } else {
+            if (mToast != null) {
+                mToast.cancel();
+            }
+            rootLayout.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
             Uri uri = DbContract.Favorites.CONTENT_URI;
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            Cursor cursor = getContentResolver().query(uri, null, null, null, DbContract.Favorites.COLUMN_TIMESTAMP + " DESC");
             movieObjects = new ArrayList<>();
             cursor.moveToFirst();
             for (int i = 0; i < cursor.getCount(); i++) {
@@ -198,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         gridView.setVisibility(View.VISIBLE);
         String imgSize;
         boolean sortByFav;
-        if (sortBy == NetworkUtils.SORT_BY_FAV) {
+        if (sortBy.equals(NetworkUtils.SORT_BY_FAV)) {
             imgSize = getString(R.string.image_size_detail);
             sortByFav = true;
         }
@@ -233,9 +249,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             try {
                 movieObjectArrayList = JsonUtils.parseListJson(json);
             } catch (JSONException e) {
-                e.printStackTrace();
-                cancel(true);
-            } catch (ParseException e) {
                 e.printStackTrace();
                 cancel(true);
             }

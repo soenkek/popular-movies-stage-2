@@ -12,8 +12,8 @@ import com.soenkek.popularmoviesstage2.data.DbContract.Favorites;
 
 public class DbHelper extends SQLiteOpenHelper {
 
-    public static final String DATABASE_NAME = "popmovies.db";
-    public static final int DATABASE_VERSION = 7;
+    private static final String DATABASE_NAME = "popmovies.db";
+    private static final int DATABASE_VERSION = 7;
 
     public DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

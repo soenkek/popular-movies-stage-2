@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -46,7 +47,7 @@ import butterknife.ButterKnife;
 public class DetailActivity extends AppCompatActivity
         implements TrailerAdapter.TrailerAdapterOnClickHandler {
 
-    CollapsingToolbarLayout collapsingToolbarLayout;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
 
     @BindView(R.id.detail_fav_iv) ImageView btnFav;
     @BindView(R.id.detail_poster_iv) ImageView posterView;
@@ -75,7 +76,7 @@ public class DetailActivity extends AppCompatActivity
         setContentView(R.layout.activity_detail);
 
         collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar_layout);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
@@ -106,6 +107,9 @@ public class DetailActivity extends AppCompatActivity
     }
 
     private void populateViews() {
+        if (mMovieObject == null) {
+            return;
+        }
         collapsingToolbarLayout.setTitle(mMovieObject.getTitle());
         Picasso.with(this)
                 .load(NetworkUtils.buildImageUri(mMovieObject.getDetailPosterPath(), getString(R.string.image_size_detail)))
@@ -138,6 +142,7 @@ public class DetailActivity extends AppCompatActivity
                     String synopsis = mMovieObject.getSynopsis();
                     Float rating = mMovieObject.getRating();
                     String release = mMovieObject.getRelease();
+                    Log.d("++++++++++++++++", "Save to db: " + id + title + originalTitle + posterPath + detailPosterPath + synopsis + rating + release);
                     contentValues.put(DbContract.Favorites.COLUMN_MOVIE_ID, id);
                     contentValues.put(DbContract.Favorites.COLUMN_MOVIE_TITLE, title);
                     contentValues.put(DbContract.Favorites.COLUMN_MOVIE_ORIGINAL_TITLE, originalTitle);
@@ -157,6 +162,14 @@ public class DetailActivity extends AppCompatActivity
                 setFavButton();
             }
         });
+        if (mTrailerObjects != null) {
+            mTrailerAdapter.setTrailerData(mTrailerObjects);
+            mRecyclerviewTrailers.setAdapter(mTrailerAdapter);
+        }
+        if (mReviewObjects != null) {
+            mReviewAdapter.setReviewData(mReviewObjects);
+            mRecyclerviewReviews.setAdapter(mReviewAdapter);
+        }
     }
 
     private void setFavButton() {
@@ -194,12 +207,6 @@ public class DetailActivity extends AppCompatActivity
                     null,
                     null,
                     null);
-//            if (cursor.getCount() != 0) {
-//                isFav = true;
-//            } else {
-//                isFav = false;
-//            }
-            MovieObject movieObject = null;
             if (cursor != null && cursor.moveToFirst()) {
                 isFav = true;
                 mMovieObject = new MovieObject(
@@ -213,6 +220,16 @@ public class DetailActivity extends AppCompatActivity
                         cursor.getString(cursor.getColumnIndex(DbContract.Favorites.COLUMN_MOVIE_RELEASE))
                 );
                 cursor.close();
+                Log.d("++++++++++++++++", "Load from db: " +
+                        mMovieObject.getId() +
+                        mMovieObject.getTitle() +
+                        mMovieObject.getOriginalTitle() +
+                        mMovieObject.getPosterPath() +
+                        mMovieObject.getDetailPosterPath() +
+                        mMovieObject.getSynopsis() +
+                        mMovieObject.getRating() +
+                        mMovieObject.getRelease()
+                );
             } else {
                 isFav = false;
                 try {
@@ -224,10 +241,8 @@ public class DetailActivity extends AppCompatActivity
                     mMovieObject = JsonUtils.parseDetailsJson(jsonDetails);
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    cancel(true);
                 } catch (ParseException e) {
                     e.printStackTrace();
-                    cancel(true);
                 }
             }
 
@@ -236,34 +251,19 @@ public class DetailActivity extends AppCompatActivity
                 jsonReviews = NetworkUtils.httpRequest(reviewsURL);
             } catch (IOException e) {
                 e.printStackTrace();
-                cancel(true);
             }
             try {
                 mTrailerObjects = JsonUtils.parseTrailersJson(jsonTrailers);
                 mReviewObjects = JsonUtils.parseReviewsJson(jsonReviews);
             } catch (JSONException e) {
                 e.printStackTrace();
-//                cancel(true);
-            } catch (ParseException e) {
-                e.printStackTrace();
-//                cancel(true);
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void v) {
-            if (mMovieObject != null) {
-                populateViews();
-            }
-            if (mTrailerObjects != null) {
-                mTrailerAdapter.setTrailerData(mTrailerObjects);
-                mRecyclerviewTrailers.setAdapter(mTrailerAdapter);
-            }
-            if (mReviewObjects != null) {
-                mReviewAdapter.setReviewData(mReviewObjects);
-                mRecyclerviewReviews.setAdapter(mReviewAdapter);
-            }
+            populateViews();
         }
     }
 }

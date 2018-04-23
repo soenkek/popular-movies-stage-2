@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.soenkek.popularmoviesstage2.R;
 import com.soenkek.popularmoviesstage2.models.MovieObject;
@@ -32,21 +33,29 @@ public class MovieObjectAdapter extends ArrayAdapter<MovieObject> {
 
     @NonNull
     @Override
-    public View getView(int position, View view, @NonNull ViewGroup parent) {
+    public View getView(int position, View rootView, @NonNull ViewGroup parent) {
         MovieObject movieObject = getItem(position);
-        if (view == null) {
-            view = LayoutInflater.from(getContext()).inflate(R.layout.item_movie, parent, false);
+        if (rootView == null) {
+            rootView = LayoutInflater.from(getContext()).inflate(R.layout.item_movie, parent, false);
         }
-        ImageView imageView = view.findViewById(R.id.item_movie_image);
+        ImageView imageView = rootView.findViewById(R.id.item_movie_image);
+        TextView textView = rootView.findViewById(R.id.item_movie_text);
         String imgPath;
         if (sortedByFav) {
             imgPath = movieObject.getDetailPosterPath();
+            textView.setVisibility(View.VISIBLE);
+            textView.setText(movieObject.getTitle());
+            imageView.setAlpha(0.6F);
         } else {
             imgPath = movieObject.getPosterPath();
+            textView.setVisibility(View.GONE);
+            imageView.setAlpha(1.0F);
         }
         Picasso.with(getContext())
                 .load(NetworkUtils.buildImageUri(imgPath, imgSize))
+                .placeholder(getContext().getResources().getDrawable(R.drawable.ic_photo_250dp))
+                .error(getContext().getResources().getDrawable(R.drawable.ic_photo_250dp))
                 .into(imageView);
-        return view;
+        return rootView;
     }
 }

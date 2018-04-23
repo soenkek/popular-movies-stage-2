@@ -19,7 +19,7 @@ import java.util.Date;
 
 public class JsonUtils {
 
-    public static ArrayList<MovieObject> parseListJson(String json) throws JSONException, ParseException {
+    public static ArrayList<MovieObject> parseListJson(String json) throws JSONException {
         if (json == null || json.equals("")) throw new JSONException("Empty json");
         ArrayList<MovieObject> movieObjects = new ArrayList<>();
         JSONObject jsonObject = new JSONObject(json);
@@ -47,7 +47,7 @@ public class JsonUtils {
         return new MovieObject(id, title, original_title, posterPath, backdrop_path, synopsis, vote_average, releaseDate);
     }
 
-    public static ArrayList<TrailerObject> parseTrailersJson(String json) throws JSONException, ParseException {
+    public static ArrayList<TrailerObject> parseTrailersJson(String json) throws JSONException {
         if (json == null || json.equals("")) throw new JSONException("Empty json");
         ArrayList<TrailerObject> trailerObjects = new ArrayList<>();
         JSONObject jsonObject = new JSONObject(json);
@@ -62,7 +62,7 @@ public class JsonUtils {
         return trailerObjects;
     }
 
-    public static ArrayList<ReviewObject> parseReviewsJson(String json) throws JSONException, ParseException {
+    public static ArrayList<ReviewObject> parseReviewsJson(String json) throws JSONException {
         if (json == null || json.equals("")) throw new JSONException("Empty json");
         ArrayList<ReviewObject> reviewObjects = new ArrayList<>();
         JSONObject jsonObject = new JSONObject(json);

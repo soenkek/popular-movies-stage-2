@@ -57,8 +57,8 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewAdap
 
         public ReviewAdapterViewHolder(View itemView) {
             super(itemView);
-            authorTv = (TextView) itemView.findViewById(R.id.review_author_tv);
-            contentTv = (TextView) itemView.findViewById(R.id.review_content_tv);
+            authorTv = itemView.findViewById(R.id.review_author_tv);
+            contentTv = itemView.findViewById(R.id.review_content_tv);
         }
     }
 }

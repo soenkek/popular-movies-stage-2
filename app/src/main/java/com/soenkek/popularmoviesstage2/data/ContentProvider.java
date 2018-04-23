@@ -16,11 +16,11 @@ import android.support.annotation.Nullable;
 
 public class ContentProvider extends android.content.ContentProvider {
 
-    public static final int FAVORITES = 100;
-    public static final int FAVORITES_WITH_ID = 101;
+    private static final int FAVORITES = 100;
+    private static final int FAVORITES_WITH_ID = 101;
 
-    Context mContext;
-    DbHelper dbHelper;
+    private Context mContext;
+    private DbHelper dbHelper;
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
     private static UriMatcher buildUriMatcher() {
@@ -39,19 +39,19 @@ public class ContentProvider extends android.content.ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(@NonNull Uri uri, @Nullable String[] strings, @Nullable String s, @Nullable String[] strings1, @Nullable String s1) {
+    public Cursor query(@NonNull Uri uri, @Nullable String[] columns, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String orderBy) {
         final SQLiteDatabase database = dbHelper.getReadableDatabase();
         int match = sUriMatcher.match(uri);
-        Cursor cursor = null;
+        Cursor cursor;
         switch (match) {
             case FAVORITES:
                 cursor = database.query(DbContract.Favorites.TABLE_NAME,
+                        columns,
+                        selection,
+                        selectionArgs,
                         null,
                         null,
-                        null,
-                        null,
-                        null,
-                        DbContract.Favorites.COLUMN_TIMESTAMP);
+                        orderBy);
                 break;
             case FAVORITES_WITH_ID:
                 String id = uri.getPathSegments().get(1);

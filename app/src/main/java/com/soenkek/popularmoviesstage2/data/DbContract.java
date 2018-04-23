@@ -12,7 +12,7 @@ public class DbContract {
     public static final String AUTHORITY = "com.soenkek.popularmoviesstage2";
     public static final String PATH_FAVORITES = "favorites";
 
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     public static final class Favorites implements BaseColumns {
         public static final Uri CONTENT_URI =
